@@ -21,7 +21,7 @@ function connect(event) {
     username = document.querySelector('#name').value.trim();
     key = document.querySelector('#key').value.trim();
 
-    if(username && key) {
+    if (username && key) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
@@ -36,7 +36,7 @@ function connect(event) {
 
 function onConnected() {
     // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/room-' + key, onMessageReceived);
+    stompClient.subscribe('/topic/room-' + key, onPayloadReceived);
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser-" + key,
@@ -48,7 +48,7 @@ function onConnected() {
 }
 
 
-function onError(error) {
+function onError() {
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
     connectingElement.style.color = 'red';
 }
@@ -57,7 +57,7 @@ function onError(error) {
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
 
-    if(messageContent && stompClient) {
+    if (messageContent && stompClient) {
         var chatMessage = {
             sender: username,
             content: messageInput.value,
@@ -72,14 +72,32 @@ function sendMessage(event) {
 }
 
 
-function onMessageReceived(payload) {
+function onPayloadReceived(payload) {
     var message = JSON.parse(payload.body);
+    onMessageReceived(message);
+}
+
+function onMessageReceived(message) {
+    console.log("new message: ", message);
 
     var messageElement = document.createElement('li');
 
-    if(message.type === 'JOIN') {
+    var dateElement = document.createElement('p');
+    dateElement.className = "message-date";
+    var dateText = document.createTextNode(formatDate(new Date(message.timestamp)));
+    dateElement.appendChild(dateText);
+    messageElement.appendChild(dateElement);
+
+    if (message.type === 'JOIN') {
         messageElement.classList.add('event-message');
         message.content = message.sender + ' joined!';
+        if (message.recentMessages && message.sender === username)
+            for (var i = 0; i < message.recentMessages.length; i++) {
+                console.log('length: ', message.recentMessages.length, 'call for ', message.recentMessages[i]);
+                onMessageReceived(message.recentMessages[i]);
+            }
+        else
+            console.log(message.recentMessages, message.sender === username);
     } else if (message.type === 'LEAVE') {
         messageElement.classList.add('event-message');
         message.content = message.sender + ' left!';
@@ -96,6 +114,7 @@ function onMessageReceived(payload) {
         var usernameElement = document.createElement('span');
         var usernameText = document.createTextNode(message.sender);
         usernameElement.appendChild(usernameText);
+
         messageElement.appendChild(usernameElement);
     }
 
@@ -120,5 +139,36 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
-usernameForm.addEventListener('submit', connect, true)
-messageForm.addEventListener('submit', sendMessage, true)
+
+/**
+ * From: https://gist.github.com/hurjas/2660489
+ * Return a timestamp with the format "dd.mm.yy hh:MM:ss"
+ * @type {Date}
+ */
+function formatDate(input) {
+    // Create an array with the current month, day and time
+    var date = [input.getDate(), input.getMonth() + 1, input.getFullYear()];
+
+    // Create an array with the current hour, minute and second
+    var time = [input.getHours(), input.getMinutes(), input.getSeconds()];
+
+    // If day and month are less than 10, add a zero
+    for (var i = 0; i < 2; i++) {
+        if (date[i] < 10) {
+            date[i] = "0" + date[i];
+        }
+    }
+
+    // If seconds and minutes are less than 10, add a zero
+    for (i = 1; i < 3; i++) {
+        if (time[i] < 10) {
+            time[i] = "0" + time[i];
+        }
+    }
+
+    // Return the formatted string
+    return date.join(".") + " " + time.join(":");
+}
+
+usernameForm.addEventListener('submit', connect, true);
+messageForm.addEventListener('submit', sendMessage, true);

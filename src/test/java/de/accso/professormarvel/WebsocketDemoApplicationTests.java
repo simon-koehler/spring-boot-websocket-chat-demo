@@ -1,4 +1,4 @@
-package com.example.websocketdemo;
+package de.accso.professormarvel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

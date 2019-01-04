@@ -1,19 +1,29 @@
-package com.example.websocketdemo.model;
+package de.accso.professormarvel.model;
+
+import org.springframework.data.annotation.Id;
 
 /**
  * Created by rajeevkumarsingh on 24/07/17.
  */
 public class ChatMessage {
-    private MessageType type;
-    private String key;
-    private String content;
-    private String sender;
+
+    @Id
+    protected String id;
+
+    protected MessageType type;
+    protected String key;
+    protected String ownerKey;
+    protected String content;
+    protected String sender;
+    protected long timestamp;
 
     public enum MessageType {
         CHAT,
         JOIN,
         LEAVE
     }
+
+    public String getId() {return id;}
 
     public MessageType getType() {
         return type;
@@ -29,6 +39,14 @@ public class ChatMessage {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getOwnerKey() {
+        return ownerKey;
+    }
+
+    public void setOwnerKey(String ownerKey) {
+        this.ownerKey = ownerKey;
     }
 
     public String getContent() {
@@ -47,13 +65,24 @@ public class ChatMessage {
         this.sender = sender;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+
     @Override
     public String toString() {
         return "ChatMessage{" +
-                "type=" + type +
-                ", key='" + key + '\'' +
+                "id='" + id + '\'' +
+                ", type=" + type +
+                ", ownerKey='" + ownerKey + '\'' +
                 ", content='" + content + '\'' +
                 ", sender='" + sender + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 '}';
     }
 }
