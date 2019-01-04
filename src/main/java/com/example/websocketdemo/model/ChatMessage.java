@@ -5,6 +5,7 @@ package com.example.websocketdemo.model;
  */
 public class ChatMessage {
     private MessageType type;
+    private String key;
     private String content;
     private String sender;
 
@@ -22,6 +23,14 @@ public class ChatMessage {
         this.type = type;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String getContent() {
         return content;
     }
@@ -36,5 +45,15 @@ public class ChatMessage {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+    @Override
+    public String toString() {
+        return "ChatMessage{" +
+                "type=" + type +
+                ", key='" + key + '\'' +
+                ", content='" + content + '\'' +
+                ", sender='" + sender + '\'' +
+                '}';
     }
 }
